@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import type { IncomingMessage, ServerResponse } from "node:http";
 import { readFile } from "node:fs/promises";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
@@ -31,7 +32,7 @@ async function readJson(
   return raw ? (JSON.parse(raw) as Record<string, unknown>) : {};
 }
 
-const server = createServer(async (req, res) => {
+async function route(req: IncomingMessage, res: ServerResponse): Promise<void> {
   const url = new URL(req.url ?? "/", `http://localhost:${port}`);
 
   if (url.pathname === "/api/health") {
@@ -72,6 +73,23 @@ const server = createServer(async (req, res) => {
 
   res.writeHead(404, { "content-type": "text/plain" });
   res.end("not found");
+}
+
+/**
+ * The error boundary every real framework gives you for free: an unexpected
+ * throw inside a route becomes a 500, rather than a dropped connection.
+ * Without it a bug in a handler is much harder to attribute than it should be.
+ */
+const server = createServer((req, res) => {
+  route(req, res).catch((error: unknown) => {
+    console.error("unhandled error in route", req.method, req.url, error);
+    if (res.headersSent) {
+      res.destroy();
+      return;
+    }
+    res.writeHead(500, { "content-type": "application/json" });
+    res.end(JSON.stringify({ error: "internal server error" }));
+  });
 });
 
 server.listen(port, () => {
