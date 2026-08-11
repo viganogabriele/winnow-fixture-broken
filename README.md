@@ -34,6 +34,23 @@ And what it should **not** say:
 | The pre-existing ESLint warning in `src/legacy.ts` | It is on `main` too. The pull request never touches that file. |
 | Anything in `e2e/` | The tests are correct; they are what *detects* defects 1 and 3. |
 
+## Three things verifying this fixture already taught us
+
+Every one of these was found by *running* the fixture rather than trusting it, and each would have made a
+planted defect silently undetectable — the worst possible failure for a test fixture, because the tool under
+test would look like it was working.
+
+1. **The layout defect was not a defect.** The form was shorter than a phone screen, so removing the
+   container's bottom padding changed nothing: a fixed footer can only cover the last control once the page
+   actually scrolls. The form is now longer than the viewport, which is also the shape this bug takes in real
+   applications.
+2. **The 500 was not reachable from the browser.** The form sent `surname` as an empty string, and an empty
+   string has `.trim()` — only a *missing* field breaks the unchecked destructuring. The client now omits
+   blank optional fields, which is what most clients do anyway, and the defect is observable where it needs
+   to be observed.
+3. **A test failed for the wrong reason.** `getByLabel("Name")` also matched "Surname", so two tests failed
+   on `main` with an error that had nothing to do with the code under test.
+
 ## Running it
 
 ```sh
