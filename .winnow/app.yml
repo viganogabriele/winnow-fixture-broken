@@ -1,0 +1,24 @@
+# Ready for winnow's Fase 3. The full schema and the reasoning behind each field
+# are in winnow's docs/decisions/0022-app-yml-v1-complete-schema.md.
+version: 1
+
+install: pnpm install --frozen-lockfile
+build: pnpm build
+start: pnpm dev
+port: 3000
+health: /api/health
+boot_timeout: 60s
+
+env:
+  literal:
+    NODE_ENV: test
+
+# No support services: this fixture is deliberately dependency-free so that
+# Fase 3 can be verified without a database in the way. Fixture #1 covers the
+# compose path.
+
+browser:
+  test_command: pnpm test:e2e
+  routes:
+    - /api/profile
+    - /api/health
