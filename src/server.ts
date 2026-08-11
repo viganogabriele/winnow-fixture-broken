@@ -18,7 +18,7 @@ type Profile = { name?: string; surname?: string };
  * branch — see README.
  */
 function displayName(body: Profile): string {
-  const { name = "", surname = "" } = body;
+  const { name = "", surname } = body;
   const full = `${name.trim()} ${surname.trim()}`.trim();
   return full || "anonymous";
 }
