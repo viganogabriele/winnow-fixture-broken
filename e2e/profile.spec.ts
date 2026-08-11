@@ -2,7 +2,7 @@ import { test, expect } from "@playwright/test";
 
 test("saving a profile with both fields works", async ({ page }) => {
   await page.goto("/");
-  await page.getByLabel("Name").fill("Ada");
+  await page.getByLabel("Name", { exact: true }).fill("Ada");
   await page.getByLabel("Surname").fill("Lovelace");
   await page.getByRole("button", { name: "Save profile" }).click();
   await expect(page.getByRole("status")).toHaveText("saved: Ada Lovelace");
@@ -12,7 +12,7 @@ test("saving a profile with an empty surname still works", async ({ page }) => {
   // This is the test the planted 500 breaks: an empty surname is a valid
   // payload, and the server must not fall over on it.
   await page.goto("/");
-  await page.getByLabel("Name").fill("Ada");
+  await page.getByLabel("Name", { exact: true }).fill("Ada");
   await page.getByRole("button", { name: "Save profile" }).click();
   await expect(page.getByRole("status")).toHaveText("saved: Ada");
 });
