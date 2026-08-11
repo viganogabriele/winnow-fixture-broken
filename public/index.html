@@ -121,13 +121,18 @@
       form.addEventListener("submit", async (event) => {
         event.preventDefault();
         const data = new FormData(form);
+
+        // Optional fields that are blank are left out of the payload rather
+        // than sent as empty strings — which is what most clients do, and what
+        // makes an unchecked default on the server observable from the browser.
+        const payload = { name: data.get("name") };
+        const surname = data.get("surname");
+        if (surname) payload.surname = surname;
+
         const response = await fetch("/api/profile", {
           method: "PATCH",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify({
-            name: data.get("name"),
-            surname: data.get("surname"),
-          }),
+          body: JSON.stringify(payload),
         });
         if (!response.ok) {
           result.textContent = `error ${response.status}`;
